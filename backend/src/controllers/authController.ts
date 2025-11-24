@@ -41,8 +41,9 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     // Set token in HTTP-only cookie
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: true, // Always true for production cookies
+      sameSite: 'none', // Required for cross-origin
+      path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -103,8 +104,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Set token in HTTP-only cookie
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: true, // Always true for production cookies
+      sameSite: 'none', // Required for cross-origin
+      path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -157,8 +159,9 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
     // Clear the token cookie
     res.clearCookie('token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+      secure: true,
+      sameSite: 'none',
+      path: '/'
     });
 
     res.status(200).json({ message: 'Logout successful' });

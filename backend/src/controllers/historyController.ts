@@ -6,6 +6,13 @@ import { AuthRequest } from '../middleware/auth';
 export const getEditHistory = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId;
+    
+    if (!userId) {
+      res.status(401).json({ error: 'User not authenticated' });
+      return;
+    }
+    
+    console.log('Fetching history for user:', userId);
     const { limit = 20, skip = 0 } = req.query;
 
     const history = await EditHistory.find({ userId })
@@ -15,6 +22,8 @@ export const getEditHistory = async (req: AuthRequest, res: Response): Promise<v
       .select('-__v');
 
     const total = await EditHistory.countDocuments({ userId });
+    
+    console.log(`Found ${history.length} edits out of ${total} total`);
 
     res.status(200).json({
       history,
@@ -23,7 +32,10 @@ export const getEditHistory = async (req: AuthRequest, res: Response): Promise<v
     });
   } catch (error: any) {
     console.error('Get edit history error:', error);
-    res.status(500).json({ error: 'Failed to retrieve edit history' });
+    res.status(500).json({ 
+      error: 'Failed to retrieve edit history',
+      details: error.message 
+    });
   }
 };
 
