@@ -11,10 +11,14 @@ const generateToken = (userId: string): string => {
 // Sign up new user
 export const signup = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('Signup request body:', req.body);
+    console.log('Content-Type:', req.headers['content-type']);
+    
     const { email, password, name } = req.body;
 
     // Validate input
     if (!email || !password || !name) {
+      console.log('Validation failed - email:', email, 'password:', password ? 'exists' : 'missing', 'name:', name);
       res.status(400).json({ error: 'All fields are required' });
       return;
     }
@@ -56,7 +60,20 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error: any) {
     console.error('Signup error:', error);
-    res.status(500).json({ error: 'Failed to create user' });
+    
+    // Check if MongoDB is not connected
+    if (error.message?.includes('buffering timed out') || error.message?.includes('no connection available')) {
+      res.status(503).json({ 
+        error: 'Database not available. Please set MONGODB_URI in .env file to enable user authentication.',
+        details: 'User features require MongoDB connection'
+      });
+      return;
+    }
+    
+    res.status(500).json({ 
+      error: 'Failed to create user',
+      details: error.message 
+    });
   }
 };
 
@@ -106,7 +123,20 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error: any) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Failed to login' });
+    
+    // Check if MongoDB is not connected
+    if (error.message?.includes('buffering timed out') || error.message?.includes('no connection available')) {
+      res.status(503).json({ 
+        error: 'Database not available. Please set MONGODB_URI in .env file to enable user authentication.',
+        details: 'User features require MongoDB connection'
+      });
+      return;
+    }
+    
+    res.status(500).json({ 
+      error: 'Failed to login',
+      details: error.message 
+    });
   }
 };
 

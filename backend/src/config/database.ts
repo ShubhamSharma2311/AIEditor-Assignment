@@ -2,10 +2,10 @@ import mongoose from 'mongoose';
 
 export const connectDB = async (): Promise<void> => {
   try {
-    const mongoURI = process.env.MONGODB_URI;
+    const mongoURI = process.env.DATABASE_URL;
     
     if (!mongoURI) {
-      console.warn('⚠️  MONGODB_URI not set. Running without database (history features disabled)');
+      console.warn('⚠️  DATABASE_URL not set. Running without database (history features disabled)');
       return;
     }
     
