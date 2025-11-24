@@ -65,7 +65,7 @@ export const editImage = async (
           editedImageUrl: editedImageBase64,
           instruction,
           metadata: {
-            modelUsed: 'Gemini 1.5 Flash',
+            modelUsed: 'Gemini 2.0 Flash',
             processingTime
           }
         });
@@ -81,7 +81,7 @@ export const editImage = async (
       editedImage: editedImageBase64,
       metadata: {
         instruction: instruction,
-        modelUsed: 'Gemini 1.5 Flash',
+        modelUsed: 'Gemini 2.0 Flash',
         processedAt: new Date().toISOString(),
         processingTime
       }

@@ -80,6 +80,63 @@ export default function ImageEditor() {
           )}
         </div>
 
+        {/* Example Instructions */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Try These Examples:
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button
+              onClick={() => setInstruction('blur the image')}
+              className="px-4 py-2 text-sm bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors font-medium"
+            >
+              🌫️ Blur
+            </button>
+            <button
+              onClick={() => setInstruction('make it grayscale')}
+              className="px-4 py-2 text-sm bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+            >
+              ⚫ Grayscale
+            </button>
+            <button
+              onClick={() => setInstruction('brighten the image')}
+              className="px-4 py-2 text-sm bg-yellow-50 text-yellow-700 rounded-lg hover:bg-yellow-100 transition-colors font-medium"
+            >
+              ☀️ Brighten
+            </button>
+            <button
+              onClick={() => setInstruction('make it more vibrant and colorful')}
+              className="px-4 py-2 text-sm bg-pink-50 text-pink-700 rounded-lg hover:bg-pink-100 transition-colors font-medium"
+            >
+              🎨 Vibrant
+            </button>
+            <button
+              onClick={() => setInstruction('sharpen the image')}
+              className="px-4 py-2 text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors font-medium"
+            >
+              🔍 Sharpen
+            </button>
+            <button
+              onClick={() => setInstruction('invert colors')}
+              className="px-4 py-2 text-sm bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors font-medium"
+            >
+              🔄 Invert
+            </button>
+            <button
+              onClick={() => setInstruction('rotate 90 degrees')}
+              className="px-4 py-2 text-sm bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors font-medium"
+            >
+              ↻ Rotate
+            </button>
+            <button
+              onClick={() => setInstruction('flip horizontal')}
+              className="px-4 py-2 text-sm bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition-colors font-medium"
+            >
+              ↔️ Flip
+            </button>
+          </div>
+        </div>
+
         {/* Instruction Input */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -88,7 +145,7 @@ export default function ImageEditor() {
           <textarea
             value={instruction}
             onChange={(e) => setInstruction(e.target.value)}
-            placeholder="e.g., remove background, make background blurred, change t-shirt color to red"
+            placeholder="e.g., 'blur the image', 'make it grayscale', 'brighten the image'"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
             rows={3}
           />

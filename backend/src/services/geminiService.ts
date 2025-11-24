@@ -29,67 +29,20 @@ export async function editImageWithGemini(
   instruction: string
 ): Promise<Buffer> {
   try {
-    // Get Gemini client (lazy initialization)
-    const client = getGeminiClient();
+    // Note: Gemini's current free API has strict rate limits and doesn't support actual image editing
+    // For this MVP, we'll apply basic image effects based on instruction keywords
+    // In production, use Gemini Imagen API (paid) or other image editing services
     
-    // Use Gemini's imagen-3.0-generate-001 model for image generation/editing
-    const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-    // Convert buffer to base64
-    const base64Image = imageBuffer.toString('base64');
+    console.log(`Processing image with instruction: "${instruction}"`);
     
-    // Determine the MIME type (supporting common formats)
-    const mimeType = getMimeType(imageBuffer);
-
-    // Create a detailed prompt for image editing
-    const prompt = `You are an expert image editor. Based on the following instruction, describe in detail how to edit the provided image: "${instruction}". 
-
-Please generate a new version of this image with the requested changes applied. Be creative and accurate with the edits.`;
-
-    // Prepare the image part
-    const imagePart = {
-      inlineData: {
-        data: base64Image,
-        mimeType: mimeType,
-      },
-    };
-
-    // Generate content with image and prompt
-    const result = await model.generateContent([prompt, imagePart]);
-    const response = await result.response;
-    const text = response.text();
-
-    // Note: Gemini's current API doesn't directly return edited images in the way we need.
-    // For a production app, you would:
-    // 1. Use Gemini's Imagen API (when available) for actual image-to-image editing
-    // 2. Or use a different approach like sending the image to a proper image editing API
-    // 3. Or use Gemini to generate masks/instructions and apply them with image processing libraries
-    
-    // For this MVP, we'll simulate an edited image by:
-    // - Using Gemini to analyze the request
-    // - Returning the original image with a watermark/overlay indicating it was "processed"
-    // In production, replace this with actual Gemini Imagen API calls
-    
-    console.log('Gemini analysis:', text);
-
-    // For now, return the original image
-    // TODO: Replace with actual Gemini Imagen API when available
-    // or implement image processing based on Gemini's instructions
+    // Apply image effects based on instruction
     return await applyBasicImageEffect(imageBuffer, instruction);
 
   } catch (error: any) {
-    console.error('Gemini API error:', error);
+    console.error('Image processing error:', error);
     
-    if (error.message?.includes('API key')) {
-      throw new AppError('Invalid Gemini API key', 401);
-    }
-    
-    if (error.message?.includes('quota')) {
-      throw new AppError('Gemini API quota exceeded. Please try again later.', 429);
-    }
-
     throw new AppError(
-      `Failed to process image with Gemini: ${error.message || 'Unknown error'}`,
+      `Failed to process image: ${error.message || 'Unknown error'}`,
       500
     );
   }
@@ -110,23 +63,107 @@ function getMimeType(buffer: Buffer): string {
 }
 
 /**
- * Apply basic image effects based on instruction
- * This is a placeholder function. In production, use proper image processing
- * libraries like Sharp or connect to Gemini's Imagen API
+ * Apply image effects based on instruction keywords
+ * This uses Sharp library for image manipulation
  */
 async function applyBasicImageEffect(
   imageBuffer: Buffer,
   instruction: string
 ): Promise<Buffer> {
-  // For MVP purposes, we'll return the original image
-  // In production, you would:
-  // 1. Use Sharp/Jimp for actual image manipulation
-  // 2. Or better yet, use Gemini's Imagen API for AI-powered editing
+  const sharp = require('sharp');
+  const lowerInstruction = instruction.toLowerCase();
   
-  console.log(`Applying effect based on instruction: "${instruction}"`);
+  let image = sharp(imageBuffer);
   
-  // Return original image (in production, this would be the edited version)
-  return imageBuffer;
+  // Check for background removal (requires special handling)
+  if (lowerInstruction.includes('remove background') || 
+      lowerInstruction.includes('remove bg') || 
+      lowerInstruction.includes('transparent background') ||
+      lowerInstruction.includes('no background')) {
+    throw new AppError(
+      'Background removal requires additional API services like remove.bg. For this demo, try effects like: blur, grayscale, brighten, darken, saturate, flip, rotate, sharpen, invert',
+      501
+    );
+  }
+  
+  // Apply effects based on keywords in the instruction
+  if (lowerInstruction.includes('blur') || lowerInstruction.includes('blurry')) {
+    image = image.blur(10);
+    console.log('Applied blur effect');
+  }
+  
+  if (lowerInstruction.includes('grayscale') || lowerInstruction.includes('black and white') || lowerInstruction.includes('grey')) {
+    image = image.grayscale();
+    console.log('Applied grayscale effect');
+  }
+  
+  if (lowerInstruction.includes('sepia')) {
+    image = image.tint({ r: 112, g: 66, b: 20 });
+    console.log('Applied sepia effect');
+  }
+  
+  if (lowerInstruction.includes('brighten') || lowerInstruction.includes('brighter') || lowerInstruction.includes('brightness')) {
+    image = image.modulate({ brightness: 1.5 });
+    console.log('Applied brightness effect');
+  }
+  
+  if (lowerInstruction.includes('darken') || lowerInstruction.includes('darker') || lowerInstruction.includes('dark')) {
+    image = image.modulate({ brightness: 0.6 });
+    console.log('Applied darken effect');
+  }
+  
+  if (lowerInstruction.includes('saturate') || lowerInstruction.includes('vibrant') || lowerInstruction.includes('colorful')) {
+    image = image.modulate({ saturation: 1.8 });
+    console.log('Applied saturation effect');
+  }
+  
+  if (lowerInstruction.includes('desaturate') || lowerInstruction.includes('less color')) {
+    image = image.modulate({ saturation: 0.5 });
+    console.log('Applied desaturation effect');
+  }
+  
+  if (lowerInstruction.includes('flip') || lowerInstruction.includes('horizontal')) {
+    image = image.flop();
+    console.log('Applied horizontal flip');
+  }
+  
+  if (lowerInstruction.includes('rotate')) {
+    const angle = lowerInstruction.match(/rotate\s+(\d+)/)?.[1];
+    image = image.rotate(angle ? parseInt(angle) : 90);
+    console.log(`Applied rotation: ${angle || 90} degrees`);
+  }
+  
+  if (lowerInstruction.includes('sharpen')) {
+    image = image.sharpen();
+    console.log('Applied sharpen effect');
+  }
+  
+  if (lowerInstruction.includes('negate') || lowerInstruction.includes('invert') || lowerInstruction.includes('negative')) {
+    image = image.negate();
+    console.log('Applied negate effect');
+  }
+  
+  if (lowerInstruction.includes('thumbnail') || lowerInstruction.includes('small') || lowerInstruction.includes('resize')) {
+    image = image.resize({ width: 800, height: 600, fit: 'inside' });
+    console.log('Resized image');
+  }
+  
+  if (lowerInstruction.includes('normalize') || lowerInstruction.includes('auto enhance')) {
+    image = image.normalize();
+    console.log('Applied normalize effect');
+  }
+  
+  // If no specific effect matched, inform user of available options
+  const hasEffect = lowerInstruction.match(/(blur|grayscale|sepia|brighten|darken|saturate|desaturate|flip|rotate|sharpen|negate|normalize|thumbnail)/i);
+  
+  if (!hasEffect) {
+    throw new AppError(
+      `Instruction "${instruction}" not recognized. Try: blur, grayscale, brighten, darken, saturate, flip, rotate, sharpen, invert, normalize`,
+      400
+    );
+  }
+  
+  return await image.jpeg({ quality: 90 }).toBuffer();
 }
 
 /**
@@ -136,7 +173,7 @@ async function applyBasicImageEffect(
 export async function generateImageFromPrompt(prompt: string): Promise<Buffer> {
   try {
     const client = getGeminiClient();
-    const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = client.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
