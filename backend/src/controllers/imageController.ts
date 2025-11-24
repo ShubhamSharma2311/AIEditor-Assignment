@@ -1,15 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
 import { editImageWithGemini } from '../services/geminiService';
 import { AppError } from '../middleware/errorHandler';
+import { EditHistory } from '../models/EditHistory';
+import { AuthRequest } from '../middleware/auth';
 
 /**
  * Controller to handle image editing requests
  */
 export const editImage = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
+  const startTime = Date.now();
+  
   try {
     // Get instruction from request body
     const { instruction } = req.body;
@@ -44,8 +48,32 @@ export const editImage = async (
     console.log(`Processing image edit request with instruction: "${instruction}"`);
     const editedImageBuffer = await editImageWithGemini(imageBuffer, instruction);
 
+    // Convert original image to base64 for storage
+    const originalImageBase64 = `data:image/jpeg;base64,${imageBuffer.toString('base64')}`;
+    
     // Convert edited image to base64 for response
     const editedImageBase64 = `data:image/jpeg;base64,${editedImageBuffer.toString('base64')}`;
+
+    const processingTime = Date.now() - startTime;
+
+    // Save to edit history if user is authenticated
+    if (req.userId) {
+      try {
+        await EditHistory.create({
+          userId: req.userId,
+          originalImageUrl: originalImageBase64,
+          editedImageUrl: editedImageBase64,
+          instruction,
+          metadata: {
+            modelUsed: 'Gemini 1.5 Flash',
+            processingTime
+          }
+        });
+      } catch (historyError) {
+        console.error('Failed to save edit history:', historyError);
+        // Don't fail the request if history save fails
+      }
+    }
 
     // Return success response
     res.json({
@@ -54,7 +82,8 @@ export const editImage = async (
       metadata: {
         instruction: instruction,
         modelUsed: 'Gemini 1.5 Flash',
-        processedAt: new Date().toISOString()
+        processedAt: new Date().toISOString(),
+        processingTime
       }
     });
 
