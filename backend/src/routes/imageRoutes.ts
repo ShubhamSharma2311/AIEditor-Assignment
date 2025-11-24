@@ -8,8 +8,10 @@ const router = Router();
 // Optional authentication middleware - adds userId if token is present
 const optionalAuth = (req: any, res: any, next: any) => {
   const authHeader = req.headers['authorization'];
-  if (authHeader) {
-    // If token is present, verify it
+  const cookieToken = req.cookies?.token;
+  
+  if (authHeader || cookieToken) {
+    // If token is present (in header or cookie), verify it
     authenticateToken(req, res, next);
   } else {
     // If no token, continue without auth
