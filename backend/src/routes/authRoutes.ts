@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { signup, login, getProfile } from '../controllers/authController';
+import { signup, login, getProfile, logout } from '../controllers/authController';
 import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
@@ -127,5 +127,25 @@ router.post('/login', login);
  *         description: Forbidden - invalid token
  */
 router.get('/profile', authenticateToken, getProfile);
+
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Logout user (clear authentication cookie)
+ *     tags: [Authentication]
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Logout successful
+ */
+router.post('/logout', logout);
 
 export default router;
