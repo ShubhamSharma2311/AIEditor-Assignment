@@ -22,7 +22,7 @@ const startServer = async () => {
       console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/auth/login`);
       console.log(`📜 History endpoint: http://localhost:${PORT}/api/history`);
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Failed to start server:', error);
     process.exit(1);
   }

@@ -69,7 +69,7 @@ export const editImage = async (
             processingTime
           }
         });
-      } catch (historyError) {
+      } catch (historyError: unknown) {
         console.error('Failed to save edit history:', historyError);
         // Don't fail the request if history save fails
       }
@@ -87,7 +87,7 @@ export const editImage = async (
       }
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     // Pass error to error handling middleware
     next(error);
   }

@@ -22,7 +22,7 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
 
     const secret = process.env.JWT_SECRET || 'fallback-secret-key';
     
-    jwt.verify(token, secret, (err, decoded: any) => {
+    jwt.verify(token, secret, (err: jwt.VerifyErrors | null, decoded: any) => {
       if (err) {
         res.status(403).json({ error: 'Invalid or expired token' });
         return;
@@ -31,7 +31,7 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
       req.userId = decoded.userId;
       next();
     });
-  } catch (error) {
+  } catch (error: unknown) {
     res.status(500).json({ error: 'Authentication error' });
   }
 };
