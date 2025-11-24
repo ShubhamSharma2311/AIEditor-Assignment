@@ -11,14 +11,10 @@ const generateToken = (userId: string): string => {
 // Sign up new user
 export const signup = async (req: Request, res: Response): Promise<void> => {
   try {
-    console.log('Signup request body:', req.body);
-    console.log('Content-Type:', req.headers['content-type']);
-    
     const { email, password, name } = req.body;
 
     // Validate input
     if (!email || !password || !name) {
-      console.log('Validation failed - email:', email, 'password:', password ? 'exists' : 'missing', 'name:', name);
       res.status(400).json({ error: 'All fields are required' });
       return;
     }
@@ -59,8 +55,6 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       }
     });
   } catch (error: any) {
-    console.error('Signup error:', error);
-    
     // Check if MongoDB is not connected
     if (error.message?.includes('buffering timed out') || error.message?.includes('no connection available')) {
       res.status(503).json({ 
@@ -70,6 +64,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       return;
     }
     
+    console.error('Signup error:', error.message);
     res.status(500).json({ 
       error: 'Failed to create user',
       details: error.message 
@@ -122,8 +117,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       }
     });
   } catch (error: any) {
-    console.error('Login error:', error);
-    
     // Check if MongoDB is not connected
     if (error.message?.includes('buffering timed out') || error.message?.includes('no connection available')) {
       res.status(503).json({ 
@@ -133,6 +126,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
     
+    console.error('Login error:', error.message);
     res.status(500).json({ 
       error: 'Failed to login',
       details: error.message 
@@ -153,7 +147,6 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
 
     res.status(200).json({ user });
   } catch (error: any) {
-    console.error('Get profile error:', error);
     res.status(500).json({ error: 'Failed to get profile' });
   }
 };
@@ -170,7 +163,6 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json({ message: 'Logout successful' });
   } catch (error: any) {
-    console.error('Logout error:', error);
     res.status(500).json({ error: 'Failed to logout' });
   }
 };
