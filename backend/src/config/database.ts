@@ -2,14 +2,20 @@ import mongoose from 'mongoose';
 
 export const connectDB = async (): Promise<void> => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-image-editor';
+    const mongoURI = process.env.MONGODB_URI;
+    
+    if (!mongoURI) {
+      console.warn('⚠️  MONGODB_URI not set. Running without database (history features disabled)');
+      return;
+    }
     
     await mongoose.connect(mongoURI);
     
     console.log('✅ MongoDB connected successfully');
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
-    process.exit(1);
+    console.warn('⚠️  MongoDB connection failed. Running without database (history features disabled)');
+    console.error('MongoDB error details:', error);
+    // Don't exit - let the app run without DB
   }
 };
 

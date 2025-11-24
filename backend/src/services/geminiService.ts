@@ -1,14 +1,22 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AppError } from '../middleware/errorHandler';
 
-// Initialize Gemini AI
-const apiKey = process.env.GEMINI_API_KEY;
+// Lazy initialization of Gemini AI
+let genAI: GoogleGenerativeAI;
 
-if (!apiKey) {
-  throw new Error('GEMINI_API_KEY is not set in environment variables');
+function getGeminiClient(): GoogleGenerativeAI {
+  if (!genAI) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY is not set in environment variables');
+    }
+    
+    genAI = new GoogleGenerativeAI(apiKey);
+  }
+  
+  return genAI;
 }
-
-const genAI = new GoogleGenerativeAI(apiKey);
 
 /**
  * Edit an image using Gemini AI based on natural language instructions
@@ -21,8 +29,11 @@ export async function editImageWithGemini(
   instruction: string
 ): Promise<Buffer> {
   try {
+    // Get Gemini client (lazy initialization)
+    const client = getGeminiClient();
+    
     // Use Gemini's imagen-3.0-generate-001 model for image generation/editing
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     // Convert buffer to base64
     const base64Image = imageBuffer.toString('base64');
@@ -124,7 +135,8 @@ async function applyBasicImageEffect(
  */
 export async function generateImageFromPrompt(prompt: string): Promise<Buffer> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const client = getGeminiClient();
+    const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
