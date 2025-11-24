@@ -2,28 +2,56 @@
 
 Backend for AI-Powered Natural-Language Image Editor
 
-## Deployment on Render
+## 🚀 Quick Deploy on Render
 
-This backend is ready to deploy on Render with zero configuration!
+### Step 1: Prepare MongoDB (Required for User Auth & History)
 
-### Environment Variables Required:
+1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) (Free tier available)
+2. Create a cluster
+3. Create a database user
+4. Whitelist all IPs: `0.0.0.0/0` (for Render access)
+5. Get your connection string: `mongodb+srv://username:password@cluster.mongodb.net/AIEditor`
 
+### Step 2: Deploy to Render
+
+1. Push your code to GitHub
+2. Go to [Render Dashboard](https://dashboard.render.com/)
+3. Click **"New +"** → **"Web Service"**
+4. Connect your GitHub repository
+5. Configure:
+
+**Basic Settings:**
+- **Name**: `ai-image-editor-backend`
+- **Region**: Choose closest to you
+- **Branch**: `main`
+- **Root Directory**: `backend`
+- **Runtime**: `Node`
+
+**Build & Deploy:**
+- **Build Command**: `npm install && npm run build`
+- **Start Command**: `npm start`
+
+**Environment Variables** (Click "Add Environment Variable"):
 ```
 PORT=5000
-DATABASE_URL=your_mongodb_connection_string (optional)
-GEMINI_API_KEY=your_gemini_api_key (optional - only if using Gemini AI)
-JWT_SECRET=your_secret_key_here
+DATABASE_URL=mongodb+srv://username:password@cluster.mongodb.net/AIEditor
+JWT_SECRET=your_long_random_secret_key_minimum_32_characters
+FRONTEND_URL=https://your-frontend-url.vercel.app
 NODE_ENV=production
 ```
 
-### Build Command:
+6. Click **"Create Web Service"**
+
+### Step 3: Get Your Backend URL
+
+After deployment (takes 2-3 minutes), you'll get:
 ```
-npm install && npm run build
+https://ai-image-editor-backend.onrender.com
 ```
 
-### Start Command:
+Use this in your frontend `.env`:
 ```
-npm start
+VITE_API_URL=https://ai-image-editor-backend.onrender.com
 ```
 
 ## Local Development
