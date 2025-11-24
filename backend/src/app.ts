@@ -12,28 +12,47 @@ const app = express();
 
 // CORS Configuration
 const allowedOrigins = [
-  'http://localhost:5173',  // Local development
+  'http://localhost:5173',
   'http://localhost:4173',
-  'https://ai-editor-assignment.vercel.app' , // Local preview
-  process.env.FRONTEND_URL  // Production frontend
+  'https://ai-editor-assignment.vercel.app',
+  process.env.FRONTEND_URL
 ].filter(Boolean);
+
+// Enable pre-flight across-the-board
+app.options('*', cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
+  credentials: true
+}));
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, postman)
-    if (!origin) return callback(null, true);
+    // Reject requests with no origin in production
+    if (!origin) {
+      // Only allow no-origin requests in development
+      return callback(process.env.NODE_ENV === 'production' ? new Error('Not allowed by CORS') : null, true);
+    }
     
     // Check if origin is allowed
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log(`Blocked CORS request from: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-  exposedHeaders: ['Set-Cookie']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Set-Cookie', 'Date', 'ETag'],
+  maxAge: 86400,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
 
 app.use(express.json({ limit: '50mb' }));
