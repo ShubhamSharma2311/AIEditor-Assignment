@@ -271,3 +271,5 @@ The application supports the following image transformations:
 ## Conclusion
 
 This AI-Powered Natural Language Image Editor demonstrates a complete full-stack application with modern web development practices. The system successfully implements user authentication, image processing capabilities, and persistent storage of edit history. Built with TypeScript for type safety and maintainability, the application provides a robust foundation that can be extended with additional image processing features or AI capabilities in the future. The modular architecture and comprehensive API documentation make it easy to understand, maintain, and scale the application as requirements evolve.
+
+- made with love by Shubham 😊❤️
