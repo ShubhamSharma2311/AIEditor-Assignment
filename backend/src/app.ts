@@ -10,10 +10,29 @@ import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 
-// Middleware
+// CORS Configuration
+const allowedOrigins = [
+  'http://localhost:5173',  // Local development
+  'http://localhost:4173',
+  'https://ai-editor-assignment.vercel.app/' , // Local preview
+  process.env.FRONTEND_URL  // Production frontend
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'https://ai-editor-assignment.vercel.app/',
-  credentials: true
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, postman)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is allowed
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json({ limit: '50mb' }));
