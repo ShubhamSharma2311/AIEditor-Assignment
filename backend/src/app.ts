@@ -14,7 +14,7 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173',  // Local development
   'http://localhost:4173',
-  'https://ai-editor-assignment.vercel.app/' , // Local preview
+  'https://ai-editor-assignment.vercel.app' , // Local preview
   process.env.FRONTEND_URL  // Production frontend
 ].filter(Boolean);
 
